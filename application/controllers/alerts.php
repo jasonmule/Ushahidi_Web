@@ -18,8 +18,6 @@ class Alerts_Controller extends Main_Controller
     const MOBILE_ALERT = 1;
 	const EMAIL_ALERT = 2;
     
-    
-
 	function __construct()
     {
         parent::__construct();
@@ -74,13 +72,13 @@ class Alerts_Controller extends Main_Controller
 
 				if (!empty($post->alert_mobile))
 				{
-        			$this->_send_mobile_alert($post->alert_mobile,
+        			$this->_send_mobile_alert($alert, $post->alert_mobile,
 								$post->alert_lon, $post->alert_lat, $post->alert_radius);
 				}
 
 				if (!empty($post->alert_email))
 				{
-					$this->_send_email_alert($post->alert_email,
+					$this->_send_email_alert($alert, $post->alert_email,
 								$post->alert_lon, $post->alert_lat, $post->alert_radius);
 				}
 
@@ -268,7 +266,7 @@ class Alerts_Controller extends Main_Controller
     }
 
 
-	private function _send_mobile_alert($alert_mobile, $alert_lon, $alert_lat, $alert_radius)
+	private function _send_mobile_alert($alert, $alert_mobile, $alert_lon, $alert_lat, $alert_radius)
 	{
 		// For Mobile Alerts, Confirmation Code
 		// Should be 6 distinct characters
@@ -307,7 +305,6 @@ class Alerts_Controller extends Main_Controller
 	
 		if ($sms->send($alert_mobile, $sms_from, $message) == "OK")
 		{
-			$alert = ORM::factory('alert');	
 			$alert->alert_type = self::MOBILE_ALERT;
 			$alert->alert_recipient = $alert_mobile;
 			$alert->alert_code = $alert_code;
@@ -322,7 +319,7 @@ class Alerts_Controller extends Main_Controller
 		return FALSE;
 	}
 
-	private function _send_email_alert($alert_email, $alert_lon, $alert_lat, $alert_radius)
+	private function _send_email_alert($alert, $alert_email, $alert_lon, $alert_lat, $alert_radius)
 	{
 		// Email Alerts, Confirmation Code
 		$alert_code = text::random('alnum', 20);
@@ -338,7 +335,6 @@ class Alerts_Controller extends Main_Controller
 
 		if (email::send($to, $from, $subject, $message, TRUE) == 1)
 		{
-			$alert = ORM::factory('alert');
 			$alert->alert_type = self::EMAIL_ALERT;
 			$alert->alert_recipient = $alert_email;
 			$alert->alert_code = $alert_code;
